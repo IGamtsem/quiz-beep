@@ -175,10 +175,70 @@
 
   // ---------- Audio ----------
   let ctx = null;
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  // iOS 17+: treat the page as media playback so the ring/silent switch does not mute it.
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch {}
+
   function audio() {
     if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-    if (ctx.state === 'suspended') ctx.resume();
+    if (ctx.state !== 'running') ctx.resume().catch(() => {});
     return ctx;
+  }
+
+  // Older iOS: a playing <audio> element switches the session to playback, which
+  // also lets Web Audio through when the phone is on silent. Loop a silent clip.
+  let silentEl = null;
+  function silentWav() {
+    const n = 4000, buf = new ArrayBuffer(44 + n), v = new DataView(buf);
+    const s = (o, t) => [...t].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+    s(0, 'RIFF'); v.setUint32(4, 36 + n, true); s(8, 'WAVEfmt ');
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, 8000, true); v.setUint32(28, 8000, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true);
+    s(36, 'data'); v.setUint32(40, n, true);
+    for (let i = 0; i < n; i++) v.setUint8(44 + i, 128);
+    return URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
+  }
+  function startSilent() {
+    if (!isIOS || navigator.audioSession) return;
+    try {
+      if (!silentEl) {
+        silentEl = document.createElement('audio');
+        silentEl.src = silentWav();
+        silentEl.loop = true;
+        silentEl.setAttribute('playsinline', '');
+        silentEl.setAttribute('x-webkit-airplay', 'deny');
+      }
+      if (silentEl.paused) silentEl.play().catch(() => {});
+    } catch {}
+  }
+
+  // Unlock audio on every kind of gesture: iOS honours touchend/click, not always pointerdown.
+  function unlock() {
+    const a = audio();
+    try {
+      const src = a.createBufferSource();
+      src.buffer = a.createBuffer(1, 1, 22050);
+      src.connect(a.destination);
+      src.start(0);
+    } catch {}
+    startSilent();
+  }
+  ['pointerdown', 'touchstart', 'touchend', 'click', 'keydown'].forEach(ev =>
+    document.addEventListener(ev, unlock, { capture: true, passive: true }));
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') { if (ctx) ctx.resume().catch(() => {}); }
+    else if (silentEl) silentEl.pause();
+  });
+
+  function checkSound() {
+    setTimeout(() => {
+      if (ctx && ctx.state !== 'running') {
+        statusEl.textContent = 'Звук заблокирован браузером. Нажмите кнопку ещё раз' +
+          (isIOS ? ' и проверьте переключатель беззвучного режима.' : '.');
+      }
+    }, 400);
   }
   function tone(type, freq, start, dur, peak, decay) {
     const a = audio();
@@ -267,6 +327,7 @@
     if (state.n > 1 && state.lockout && state.winner !== null) return;
 
     play(i);
+    checkSound();
     if (navigator.vibrate) navigator.vibrate(state.n === 1 ? 120 : [80, 40, 80]);
     flash(btns[i]);
 
