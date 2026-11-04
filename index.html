@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#111318">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -12,183 +12,486 @@
 <style>
   :root {
     --bg: #111318;
-    --panel: #1b1e25;
+    --panel: #1a1d24;
+    --chip: #242833;
+    --chip-on: #e5383b;
     --text: #f2f3f5;
     --muted: #8a8f9c;
-    --line: #2a2e38;
-    --p1: #e5383b;
-    --p2: #2f80ed;
-    --p3: #27ae60;
-    --p4: #f2a900;
+    --line: #2b303b;
+    --btn: #e5383b;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; margin: 0; }
+  html, body { margin: 0; height: 100%; }
   body {
     background: var(--bg);
     color: var(--text);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    display: flex;
-    flex-direction: column;
+    height: 100dvh;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas: "head" "stage" "panel";
     overflow: hidden;
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
   }
-  header {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    padding: 10px 16px;
-    flex-wrap: wrap;
-  }
+  header { grid-area: head; display: flex; align-items: center; gap: 8px; padding: 10px 16px; }
   header h1 { font-size: 17px; margin: 0 auto 0 0; letter-spacing: .02em; }
-  .seg { display: flex; background: var(--panel); border-radius: 10px; padding: 3px; border: 1px solid var(--line); }
-  .seg button, .icon-btn {
-    border: 0; background: transparent; color: var(--muted);
-    font: inherit; font-size: 14px; padding: 6px 11px; border-radius: 7px; cursor: pointer;
-  }
-  .seg button[aria-pressed="true"] { background: #2d323d; color: var(--text); }
-  .icon-btn { background: var(--panel); border: 1px solid var(--line); color: var(--text); padding: 7px 12px; border-radius: 10px; }
-
-  main { flex: 1; display: grid; gap: 12px; padding: 4px 16px 16px; min-height: 0; }
-  main.n1 { grid-template: 1fr / 1fr; place-items: center; }
-  main.n2 { grid-template: 1fr 1fr / 1fr; }
-  main.n3 { grid-template: repeat(3, 1fr) / 1fr; }
-  main.n4 { grid-template: 1fr 1fr / 1fr 1fr; }
-  @media (min-aspect-ratio: 1/1) {
-    main.n2 { grid-template: 1fr / 1fr 1fr; }
-    main.n3 { grid-template: 1fr / repeat(3, 1fr); }
+  .icon-btn {
+    background: var(--panel); border: 1px solid var(--line); color: var(--text);
+    font: inherit; font-size: 15px; padding: 7px 12px; border-radius: 10px; cursor: pointer;
   }
 
-  .buzz {
-    --c: var(--p1);
-    position: relative;
-    border: 0; cursor: pointer;
-    color: #fff; font: inherit; font-weight: 800;
-    background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--c) 75%, #fff) 0%, var(--c) 55%, color-mix(in srgb, var(--c) 70%, #000) 100%);
-    box-shadow: 0 10px 0 color-mix(in srgb, var(--c) 55%, #000), 0 18px 40px rgba(0,0,0,.45);
-    transition: transform .06s, box-shadow .06s, filter .2s, opacity .2s;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
-    min-height: 0; min-width: 0;
+  .stage { grid-area: stage; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; min-height: 0; padding: 8px 16px; }
+  #beep {
+    width: min(74vw, 44dvh, 440px); aspect-ratio: 1; border-radius: 50%;
+    border: 0; cursor: pointer; color: #fff; font: inherit;
+    background: radial-gradient(circle at 50% 35%, #ff7a7c 0%, var(--btn) 55%, #9c1f22 100%);
+    box-shadow: 0 10px 0 #7d1719, 0 20px 44px rgba(0,0,0,.5);
+    transition: transform .06s, box-shadow .06s;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
   }
-  main.n1 .buzz {
-    width: min(78vw, 62vh, 460px); aspect-ratio: 1; border-radius: 50%;
-    font-size: clamp(40px, 13vw, 96px); letter-spacing: .06em;
-  }
-  main:not(.n1) .buzz { border-radius: 22px; font-size: clamp(26px, 7vw, 56px); width: 100%; height: calc(100% - 10px); }
-  .buzz small { font-size: 13px; font-weight: 500; opacity: .75; letter-spacing: .04em; }
-  .buzz:active, .buzz.down { transform: translateY(8px); box-shadow: 0 2px 0 color-mix(in srgb, var(--c) 55%, #000), 0 6px 16px rgba(0,0,0,.4); }
-  .buzz.locked { filter: grayscale(.85) brightness(.45); cursor: not-allowed; }
-  .buzz.winner { animation: pulse .5s ease-in-out 3; outline: 5px solid #fff; outline-offset: 4px; }
-  .buzz .name {
-    background: transparent; border: 0; color: inherit; font: inherit; text-align: center; width: 90%;
-    outline: none; pointer-events: none;
-  }
-  @keyframes pulse { 50% { filter: brightness(1.35); transform: scale(1.03); } }
-
-  footer {
-    display: flex; justify-content: center; align-items: center; gap: 12px;
-    padding: 0 16px 14px; color: var(--muted); font-size: 13px; min-height: 44px; flex-wrap: wrap;
-  }
-  #reset {
-    background: #fff; color: #111; border: 0; border-radius: 999px; padding: 10px 26px;
-    font: inherit; font-weight: 700; font-size: 16px; cursor: pointer;
-  }
-  #reset[hidden] { display: none; }
-  #status { min-width: 0; text-align: center; }
+  #beep b { font-size: clamp(40px, 12vw, 92px); letter-spacing: .06em; line-height: 1; }
+  #beep span { font-size: clamp(13px, 3.6vw, 17px); opacity: .85; max-width: 80%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #beep:focus:not(:focus-visible) { outline: none; }
+  #beep:focus-visible { outline: 3px solid #fff; outline-offset: 6px; }
+  #beep:active, #beep.down { transform: translateY(8px); box-shadow: 0 2px 0 #7d1719, 0 8px 18px rgba(0,0,0,.45); }
+  #status { color: var(--muted); font-size: 13px; text-align: center; min-height: 18px; }
   kbd { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-size: 12px; color: var(--text); }
 
-  dialog {
-    background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 16px;
-    width: min(420px, calc(100vw - 32px)); padding: 20px;
+  .panel {
+    grid-area: panel;
+    background: var(--panel);
+    border-top: 1px solid var(--line);
+    border-radius: 18px 18px 0 0;
+    max-height: 42dvh;
+    overflow-y: auto;
+    padding: 12px 16px calc(16px + env(safe-area-inset-bottom));
+    -webkit-overflow-scrolling: touch;
   }
-  dialog::backdrop { background: rgba(0,0,0,.6); }
-  dialog h2 { margin: 0 0 14px; font-size: 18px; }
-  dialog label { display: block; margin: 14px 0 6px; font-size: 14px; color: var(--muted); }
-  dialog input[type=range] { width: 100%; }
-  dialog .row { display: flex; gap: 8px; flex-wrap: wrap; }
-  dialog .names input {
-    width: 100%; margin-bottom: 6px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line);
-    background: var(--bg); color: var(--text); font: inherit;
+  .vol { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); margin-bottom: 4px; }
+  .vol input { flex: 1; accent-color: var(--chip-on); }
+  .panel h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 14px 0 8px; font-weight: 600; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    background: var(--chip); color: var(--text); border: 1px solid var(--line);
+    font: inherit; font-size: 14px; padding: 8px 12px; border-radius: 999px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px; max-width: 100%;
   }
-  dialog .close { margin-top: 18px; width: 100%; }
-  .check { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 14px; }
+  .chip[aria-pressed="true"] { background: var(--chip-on); border-color: var(--chip-on); }
+  .chip .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chip .x { margin-left: 2px; opacity: .7; padding: 0 2px; }
+  .chip.add { border-style: dashed; color: var(--muted); }
+  .hint { font-size: 12px; color: var(--muted); margin: 8px 0 0; line-height: 1.4; }
+
+  @media (min-width: 760px) and (min-aspect-ratio: 1/1) {
+    body { grid-template-columns: minmax(0, 1fr) 400px; grid-template-rows: auto minmax(0, 1fr); grid-template-areas: "head head" "stage panel"; }
+    .panel { max-height: none; border-radius: 18px 0 0 0; border-left: 1px solid var(--line); }
+    #beep { width: min(60vw, 62dvh, 460px); }
+  }
 </style>
 </head>
 <body>
 <header>
   <h1>Quiz Beep</h1>
-  <div class="seg" role="group" aria-label="Количество игроков">
-    <button data-n="1" aria-pressed="true">1</button>
-    <button data-n="2" aria-pressed="false">2</button>
-    <button data-n="3" aria-pressed="false">3</button>
-    <button data-n="4" aria-pressed="false">4</button>
-  </div>
   <button class="icon-btn" id="fs" title="Во весь экран" aria-label="Во весь экран">⛶</button>
-  <button class="icon-btn" id="settingsBtn" title="Настройки" aria-label="Настройки">⚙</button>
 </header>
 
-<main id="board" class="n1"></main>
+<section class="stage">
+  <button id="beep" aria-label="Beep"><b>BEEP</b><span id="current"></span></button>
+  <div id="status"></div>
+</section>
 
-<footer>
-  <span id="status"></span>
-  <button id="reset" hidden>Сброс</button>
-</footer>
-
-<dialog id="settings">
-  <h2>Настройки</h2>
-  <label>Звук</label>
-  <div class="seg" role="group" id="soundSeg">
-    <button data-s="beep" aria-pressed="true">Бип</button>
-    <button data-s="buzzer" aria-pressed="false">Зуммер</button>
-    <button data-s="ding" aria-pressed="false">Звонок</button>
-  </div>
-  <label for="vol">Громкость</label>
-  <input id="vol" type="range" min="0" max="1" step="0.05" value="0.8">
-  <label class="check"><input type="checkbox" id="lockout" checked> Блокировать остальных после первого нажатия</label>
-  <label>Имена игроков</label>
-  <div class="names" id="names"></div>
-  <button class="icon-btn close" id="closeSettings">Готово</button>
-</dialog>
+<section class="panel" aria-label="Звуки">
+  <label class="vol">🔊 <input id="vol" type="range" min="0" max="1" step="0.05" aria-label="Громкость"></label>
+  <div id="groups"></div>
+  <input type="file" id="file" accept="audio/*" multiple hidden>
+</section>
 
 <script>
 (() => {
-  const COLORS = ['var(--p1)', 'var(--p2)', 'var(--p3)', 'var(--p4)'];
-  const KEYS = [['1', 'a'], ['2', 'l'], ['3', 'z'], ['4', 'm']];
-  const PITCH = [1, 1.26, 1.5, 1.78];
-
+  // ---------- Storage ----------
   const store = {
     get(k, d) { try { const v = localStorage.getItem('qb:' + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
     set(k, v) { try { localStorage.setItem('qb:' + k, JSON.stringify(v)); } catch {} }
   };
 
-  const state = {
-    n: store.get('n', 1),
-    sound: store.get('sound', 'beep'),
-    vol: store.get('vol', 0.8),
-    lockout: store.get('lockout', true),
-    names: store.get('names', ['Игрок 1', 'Игрок 2', 'Игрок 3', 'Игрок 4']),
-    winner: null,
-    t0: 0
-  };
-
-  // ---------- Audio ----------
-  let ctx = null;
+  // ---------- Audio engine ----------
+  let ctx = null, master = null, reverbIn = null, noiseBuf = null, shaper = null;
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-  // iOS 17+: treat the page as media playback so the ring/silent switch does not mute it.
   try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch {}
 
   function audio() {
-    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (!ctx) {
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const comp = ctx.createDynamicsCompressor();
+      comp.threshold.value = -10; comp.knee.value = 6; comp.ratio.value = 6;
+      comp.attack.value = 0.002; comp.release.value = 0.2;
+      master = ctx.createGain();
+      master.gain.value = vol;
+      master.connect(comp).connect(ctx.destination);
+
+      // simple generated reverb
+      const len = Math.floor(ctx.sampleRate * 2.2);
+      const ir = ctx.createBuffer(2, len, ctx.sampleRate);
+      for (let c = 0; c < 2; c++) {
+        const d = ir.getChannelData(c);
+        for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+      }
+      const conv = ctx.createConvolver();
+      conv.buffer = ir;
+      reverbIn = ctx.createGain();
+      reverbIn.gain.value = 0.5;
+      reverbIn.connect(conv).connect(master);
+
+      noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+      const nd = noiseBuf.getChannelData(0);
+      for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+
+      shaper = ctx.createWaveShaper();
+      const curve = new Float32Array(1024);
+      for (let i = 0; i < 1024; i++) { const x = i / 512 - 1; curve[i] = Math.tanh(x * 4); }
+      shaper.curve = curve;
+      shaper.connect(master);
+    }
     if (ctx.state !== 'running') ctx.resume().catch(() => {});
     return ctx;
   }
 
-  // Older iOS: a playing <audio> element switches the session to playback, which
-  // also lets Web Audio through when the phone is on silent. Loop a silent clip.
+  const Z = 0.0001;
+  function envelope(g, t, peak, dur, { attack = 0.005, release = 0.05, decay = false } = {}) {
+    peak = Math.max(peak, Z * 2);
+    g.gain.setValueAtTime(Z, t);
+    g.gain.exponentialRampToValueAtTime(peak, t + attack);
+    if (decay) {
+      g.gain.exponentialRampToValueAtTime(Z, t + dur);
+    } else {
+      g.gain.setValueAtTime(peak, Math.max(t + attack, t + dur - release));
+      g.gain.exponentialRampToValueAtTime(Z, t + dur);
+    }
+  }
+  function route(node, opts) {
+    if (opts.dist) node.connect(shaper); else node.connect(master);
+    if (opts.verb) { const s = ctx.createGain(); s.gain.value = opts.verb; node.connect(s).connect(reverbIn); }
+  }
+  // osc({ f, t, dur, gain, type, to, glide, curve, vib, lp, lpTo, decay, attack, release, dist, verb })
+  function osc(o) {
+    const a = audio();
+    const t = o.t, dur = o.dur;
+    const n = a.createOscillator();
+    n.type = o.type || 'sine';
+    n.frequency.setValueAtTime(o.f, t);
+    if (o.curve) for (const [dt, f] of o.curve) n.frequency.linearRampToValueAtTime(f, t + dt);
+    else if (o.to) {
+      if (o.glide === 'lin') n.frequency.linearRampToValueAtTime(o.to, t + (o.toAt || dur));
+      else n.frequency.exponentialRampToValueAtTime(o.to, t + (o.toAt || dur));
+    }
+    if (o.detune) n.detune.value = o.detune;
+    if (o.vib) {
+      const l = a.createOscillator(), lg = a.createGain();
+      l.frequency.value = o.vib[0]; lg.gain.value = o.vib[1];
+      l.connect(lg).connect(n.frequency);
+      l.start(t + (o.vib[2] || 0)); l.stop(t + dur + 0.05);
+    }
+    const g = a.createGain();
+    envelope(g, t, o.gain ?? 0.3, dur, o);
+    let last = n;
+    if (o.lp) {
+      const f = a.createBiquadFilter();
+      f.type = 'lowpass'; f.frequency.setValueAtTime(o.lp, t); f.Q.value = o.q || 1;
+      if (o.lpTo) f.frequency.exponentialRampToValueAtTime(o.lpTo, t + (o.lpAt || dur));
+      last.connect(f); last = f;
+    }
+    last.connect(g);
+    route(g, o);
+    n.start(t); n.stop(t + dur + 0.05);
+  }
+  // noise({ t, dur, gain, ft, f, q, to, decay, attack, verb })
+  function noise(o) {
+    const a = audio();
+    const s = a.createBufferSource();
+    s.buffer = noiseBuf; s.loop = true;
+    const f = a.createBiquadFilter();
+    f.type = o.ft || 'bandpass';
+    f.frequency.setValueAtTime(o.f || 1000, o.t);
+    if (o.to) f.frequency.exponentialRampToValueAtTime(o.to, o.t + o.dur);
+    f.Q.value = o.q ?? 1;
+    const g = a.createGain();
+    envelope(g, o.t, o.gain ?? 0.3, o.dur, { decay: o.decay ?? true, attack: o.attack ?? 0.002, release: o.release });
+    s.connect(f).connect(g);
+    route(g, o);
+    s.start(o.t, Math.random()); s.stop(o.t + o.dur + 0.05);
+  }
+  const note = n => 440 * Math.pow(2, (n - 69) / 12); // MIDI -> Hz
+
+  // ---------- Speech (meme phrases) ----------
+  const canSpeak = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  let voices = [];
+  function loadVoices() { try { voices = speechSynthesis.getVoices(); } catch {} }
+  if (canSpeak) { loadVoices(); speechSynthesis.addEventListener?.('voiceschanged', loadVoices); }
+  function speak(text, lang, rate = 1, pitch = 1) {
+    if (!canSpeak) { status('Этот браузер не умеет синтез речи'); return; }
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = lang; u.rate = rate; u.pitch = pitch; u.volume = Math.min(1, vol * 1.25);
+      const v = voices.find(v => v.lang && v.lang.replace('_', '-').toLowerCase().startsWith(lang.toLowerCase()))
+             || voices.find(v => v.lang && v.lang.toLowerCase().startsWith(lang.slice(0, 2)));
+      if (v) u.voice = v;
+      speechSynthesis.speak(u);
+    } catch { status('Не удалось воспроизвести речь'); }
+  }
+
+  // ---------- Sound library ----------
+  const SOUNDS = [
+    // Классика
+    { id: 'beep', g: 'Классика', e: '🔴', n: 'Бип', p: t => osc({ type: 'square', f: 880, t, dur: 0.42, gain: 0.32 }) },
+    { id: 'double', g: 'Классика', e: '⏱️', n: 'Бип-бип', p: t => { osc({ type: 'square', f: 1000, t, dur: 0.13, gain: 0.3 }); osc({ type: 'square', f: 1000, t: t + 0.19, dur: 0.13, gain: 0.3 }); } },
+    { id: 'buzzer', g: 'Классика', e: '❌', n: 'Неверно', p: t => { osc({ type: 'sawtooth', f: 110, t, dur: 0.85, gain: 0.32, lp: 1400 }); osc({ type: 'sawtooth', f: 116.5, t, dur: 0.85, gain: 0.32, lp: 1400 }); } },
+    { id: 'correct', g: 'Классика', e: '✅', n: 'Верно', p: t => [84, 88, 91, 96].forEach((m, i) => osc({ type: 'triangle', f: note(m), t: t + i * 0.09, dur: 0.6, gain: 0.32, decay: true, verb: 0.3 })) },
+    { id: 'ding', g: 'Классика', e: '🛎️', n: 'Звонок', p: t => { osc({ f: 1320, t, dur: 1.6, gain: 0.55, decay: true, verb: 0.3 }); osc({ f: 2640, t, dur: 0.6, gain: 0.15, decay: true }); osc({ f: 3960, t, dur: 0.3, gain: 0.06, decay: true }); } },
+    { id: 'gong', g: 'Классика', e: '🔔', n: 'Гонг', p: t => [[1, .5], [1.48, .3], [2.0, .25], [2.76, .18], [3.4, .12], [4.1, .08]].forEach(([r, gn]) => osc({ f: 92 * r, t, dur: 4.5, gain: gn, decay: true, attack: 0.02, vib: [0.7 + r, 1.5], verb: 0.6 })) },
+    { id: 'whistle', g: 'Классика', e: '📯', n: 'Свисток', p: t => { osc({ f: 2900, t, dur: 0.75, gain: 0.28, vib: [32, 220], attack: 0.02, release: 0.08 }); noise({ t, dur: 0.75, gain: 0.08, f: 2900, q: 6, decay: false, attack: 0.02, release: 0.08 }); } },
+    { id: 'horn', g: 'Классика', e: '🚗', n: 'Клаксон', p: t => [[0, 0.22], [0.3, 0.55]].forEach(([d, l]) => { osc({ type: 'square', f: 370, t: t + d, dur: l, gain: 0.2, lp: 2200 }); osc({ type: 'square', f: 466, t: t + d, dur: l, gain: 0.2, lp: 2200 }); }) },
+    { id: 'siren', g: 'Классика', e: '🚨', n: 'Сирена', p: t => osc({ type: 'sawtooth', f: 600, t, dur: 1.8, gain: 0.22, lp: 3000, curve: [[0.45, 1250], [0.9, 600], [1.35, 1250], [1.8, 600]] }) },
+    { id: 'tada', g: 'Классика', e: '🎉', n: 'Та-да!', p: t => { [60, 64, 67].forEach(m => osc({ type: 'sawtooth', f: note(m), t, dur: 0.14, gain: 0.12, lp: 2500 })); [72, 76, 79, 84].forEach(m => osc({ type: 'sawtooth', f: note(m), t: t + 0.18, dur: 1.2, gain: 0.1, lp: 3000, lpTo: 1200, vib: [5.5, 3, 0.3], verb: 0.3 })); } },
+    { id: 'drumroll', g: 'Классика', e: '🥁', n: 'Барабанная дробь', p: t => { for (let i = 0; i < 34; i++) noise({ t: t + i * 0.05, dur: 0.06, gain: 0.14 + 0.3 * (i / 34), f: 1800, q: 0.8 }); const c = t + 1.75; noise({ t: c, dur: 1.6, gain: 0.45, ft: 'highpass', f: 5000, q: 0.5, verb: 0.4 }); osc({ f: 80, to: 45, t: c, dur: 0.4, gain: 0.7, decay: true }); } },
+    { id: 'cash', g: 'Классика', e: '💰', n: 'Ка-чинг', p: t => { noise({ t, dur: 0.06, gain: 0.4, f: 3000, q: 2 }); noise({ t: t + 0.07, dur: 0.05, gain: 0.3, f: 4500, q: 2 }); osc({ f: 2093, t: t + 0.1, dur: 1.0, gain: 0.3, decay: true, verb: 0.3 }); osc({ f: 2637, t: t + 0.1, dur: 1.0, gain: 0.25, decay: true }); } },
+    { id: 'laser', g: 'Классика', e: '🔫', n: 'Пиу', p: t => osc({ type: 'square', f: 1900, to: 180, t, dur: 0.28, gain: 0.32, decay: true }) },
+    { id: 'coin', g: 'Классика', e: '🪙', n: 'Монетка', p: t => { osc({ type: 'square', f: 1047, t, dur: 0.07, gain: 0.3 }); osc({ type: 'square', f: 1568, t: t + 0.07, dur: 0.4, gain: 0.3, decay: true }); } },
+    { id: 'powerup', g: 'Классика', e: '⭐', n: 'Бонус', p: t => [60, 64, 67, 72, 76, 79, 84, 88].forEach((m, i) => osc({ type: 'square', f: note(m), t: t + i * 0.05, dur: 0.07, gain: 0.26 })) },
+    { id: 'boing', g: 'Классика', e: '🌀', n: 'Боинг', p: t => osc({ f: 130, to: 360, t, dur: 0.6, gain: 0.55, decay: true, vib: [14, 45] }) },
+
+    // Мемы (синтезированные)
+    { id: 'airhorn', g: 'Мемы', e: '📢', n: 'Эйрхорн', p: t => [[0, 0.14], [0.19, 0.14], [0.38, 0.95]].forEach(([d, l]) => [-12, 0, 9].forEach(dt => osc({ type: 'sawtooth', f: 360, to: 415, toAt: 0.04, t: t + d, dur: l, gain: 0.16, detune: dt, lp: 3200, dist: true, attack: 0.008 }))) },
+    { id: 'vineboom', g: 'Мемы', e: '💥', n: 'Vine boom', p: t => { osc({ f: 95, to: 38, t, dur: 1.4, gain: 0.9, decay: true, dist: true, verb: 0.7 }); osc({ type: 'triangle', f: 190, to: 60, t, dur: 0.5, gain: 0.3, decay: true, verb: 0.5 }); noise({ t, dur: 0.18, gain: 0.5, ft: 'lowpass', f: 500, q: 0.7, verb: 0.6 }); } },
+    { id: 'sadtrombone', g: 'Мемы', e: '🎺', n: 'Грустный тромбон', p: t => [[62, 0, 0.42], [61, 0.45, 0.42], [60, 0.9, 0.42], [59, 1.35, 1.4]].forEach(([m, d, l], i) => osc({ type: 'sawtooth', f: note(m), t: t + d, dur: l, gain: 0.3, lp: 350, lpTo: 1800, lpAt: 0.18, q: 3, attack: 0.03, release: 0.12, vib: i === 3 ? [6, 6, 0.25] : null, verb: 0.2 })) },
+    { id: 'dramatic', g: 'Мемы', e: '😱', n: 'Дун-дун-ДУУН', p: t => [[50, 0, 0.3], [53, 0.36, 0.3], [49, 0.72, 2.0]].forEach(([m, d, l], i) => { [0, 7, 12].forEach(iv => osc({ type: 'sawtooth', f: note(m + iv - 12), t: t + d, dur: l, gain: 0.16, lp: 1600, lpTo: i === 2 ? 500 : 1200, attack: 0.01, decay: i === 2, release: 0.06, vib: i === 2 ? [5, 3, 0.4] : null, verb: 0.5 })); noise({ t: t + d, dur: 0.25, gain: 0.35, ft: 'lowpass', f: 180, verb: 0.4 }); }) },
+    { id: 'rimshot', g: 'Мемы', e: '🤡', n: 'Ба-дум-тсс', p: t => { osc({ f: 200, to: 110, t, dur: 0.22, gain: 0.7, decay: true }); osc({ f: 140, to: 80, t: t + 0.18, dur: 0.25, gain: 0.7, decay: true }); const c = t + 0.42; osc({ f: 70, to: 45, t: c, dur: 0.3, gain: 0.7, decay: true }); noise({ t: c, dur: 0.15, gain: 0.35, f: 2200, q: 0.8 }); noise({ t: c, dur: 1.3, gain: 0.35, ft: 'highpass', f: 6500, q: 0.4, verb: 0.3 }); } },
+    { id: 'bonk', g: 'Мемы', e: '🔨', n: 'Бонк', p: t => { osc({ f: 560, to: 170, t, dur: 0.14, gain: 0.8, decay: true }); osc({ type: 'triangle', f: 280, t, dur: 0.3, gain: 0.35, decay: true }); noise({ t, dur: 0.05, gain: 0.5, f: 1400, q: 2 }); } },
+    { id: 'crickets', g: 'Мемы', e: '🦗', n: 'Сверчки', p: t => { for (let k = 0; k < 4; k++) for (let j = 0; j < 3; j++) osc({ f: 4400, t: t + k * 0.55 + j * 0.045, dur: 0.03, gain: 0.14, attack: 0.004, release: 0.01, verb: 0.3 }); } },
+    { id: 'fail', g: 'Мемы', e: '📉', n: 'Провал', p: t => osc({ type: 'sawtooth', f: 520, to: 70, t, dur: 1.3, gain: 0.25, lp: 1800, vib: [9, 14], decay: true }) },
+    { id: 'slide', g: 'Мемы', e: '🛝', n: 'Свисток вверх', p: t => osc({ f: 500, to: 2200, t, dur: 0.6, gain: 0.3, vib: [7, 18], attack: 0.02 }) },
+    { id: 'quack', g: 'Мемы', e: '🦆', n: 'Кря', p: t => osc({ type: 'sawtooth', f: 520, to: 340, t, dur: 0.22, gain: 0.35, lp: 900, lpTo: 2600, lpAt: 0.06, q: 8, attack: 0.01 }) },
+
+    // Мемные фразы (голос телефона)
+    { id: 'bruh', g: 'Фразы', e: '😐', n: 'Bruh', say: ['bruh', 'en-US', 0.6, 0.2] },
+    { id: 'oof', g: 'Фразы', e: '🤕', n: 'Oof', say: ['oof', 'en-US', 0.9, 0.7] },
+    { id: 'wow', g: 'Фразы', e: '😮', n: 'Wow', say: ['woooow', 'en-US', 0.55, 1.1] },
+    { id: 'sheesh', g: 'Фразы', e: '🥶', n: 'Sheesh', say: ['sheeeeeesh', 'en-US', 0.6, 1] },
+    { id: 'damage', g: 'Фразы', e: '💔', n: 'Emotional damage', say: ['Emotional damage!', 'en-US', 1, 0.8] },
+    { id: 'letsgo', g: 'Фразы', e: '🚀', n: "Let's go!", say: ["Let's goooo!", 'en-US', 1, 1.2] },
+    { id: 'vopros', g: 'Фразы', e: '❓', n: 'Внимание, вопрос!', say: ['Внимание, вопрос!', 'ru-RU', 0.9, 0.9] },
+    { id: 'fiasko', g: 'Фразы', e: '🤦', n: 'Это фиаско, братан', say: ['Это фиаско, братан.', 'ru-RU', 0.9, 0.8] },
+    { id: 'dosvid', g: 'Фразы', e: '👋', n: 'Давай, до свидания!', say: ['Давай, до свидания!', 'ru-RU', 1.05, 1] },
+    { id: 'oivse', g: 'Фразы', e: '🙄', n: 'Ой, всё!', say: ['Ой, всё!', 'ru-RU', 1, 1.2] },
+    { id: 'pravilno', g: 'Фразы', e: '👍', n: 'Абсолютно верно!', say: ['Абсолютно верно!', 'ru-RU', 1, 1] },
+
+    { id: 'random', g: 'Классика', e: '🎲', n: 'Случайный', random: true }
+  ];
+  const byId = id => SOUNDS.find(s => s.id === id) || customs.find(s => s.id === id);
+
+  // ---------- Custom sounds (IndexedDB) ----------
+  let customs = []; // { id, n, e, g:'Свои', data:ArrayBuffer, buf:AudioBuffer }
+  let customSrc = null;
+  let dbp = null;
+  function db() {
+    if (!dbp) dbp = new Promise((res, rej) => {
+      try {
+        const r = indexedDB.open('quizbeep', 1);
+        r.onupgradeneeded = () => r.result.createObjectStore('sounds', { keyPath: 'id' });
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => rej(r.error);
+      } catch (e) { rej(e); }
+    });
+    return dbp;
+  }
+  async function dbAll() {
+    try {
+      const d = await db();
+      return await new Promise((res, rej) => { const q = d.transaction('sounds').objectStore('sounds').getAll(); q.onsuccess = () => res(q.result || []); q.onerror = () => rej(q.error); });
+    } catch { return []; }
+  }
+  async function dbPut(rec) { try { const d = await db(); d.transaction('sounds', 'readwrite').objectStore('sounds').put(rec); } catch {} }
+  async function dbDel(id) { try { const d = await db(); d.transaction('sounds', 'readwrite').objectStore('sounds').delete(id); } catch {} }
+
+  function decode(data) {
+    const a = audio();
+    return new Promise((res, rej) => {
+      const p = a.decodeAudioData(data.slice(0), res, rej);
+      if (p && p.then) p.then(res, rej);
+    });
+  }
+  async function playCustom(s) {
+    try {
+      if (!s.buf) s.buf = await decode(s.data);
+      const a = audio();
+      if (customSrc) { try { customSrc.stop(); } catch {} }
+      const src = a.createBufferSource();
+      src.buffer = s.buf;
+      src.connect(master);
+      src.start();
+      customSrc = src;
+    } catch { status('Не получилось прочитать этот файл'); }
+  }
+
+  // ---------- Playback ----------
+  let vol = store.get('vol', 0.8);
+  let current = store.get('sound', 'beep');
+  let lastRandom = null;
+
+  function resolve(s) {
+    if (!s || !s.random) return s;
+    const pool = SOUNDS.filter(x => !x.random && (!x.say || canSpeak)).concat(customs);
+    let pick;
+    do { pick = pool[Math.floor(Math.random() * pool.length)]; } while (pool.length > 1 && pick === lastRandom);
+    lastRandom = pick;
+    return pick;
+  }
+
+  function playSound(s) {
+    s = resolve(s);
+    if (!s) return;
+    if (s.say) { speak(...s.say); return s; }
+    if (s.data) { playCustom(s); return s; }
+    const a = audio();
+    s.p(a.currentTime + 0.01);
+    return s;
+  }
+
+  // ---------- UI ----------
+  const beepBtn = document.getElementById('beep');
+  const currentEl = document.getElementById('current');
+  const statusEl = document.getElementById('status');
+  const groupsEl = document.getElementById('groups');
+  const fileIn = document.getElementById('file');
+  const volIn = document.getElementById('vol');
+  let statusTimer = null;
+
+  function status(msg, html) {
+    clearTimeout(statusTimer);
+    if (html) statusEl.innerHTML = msg; else statusEl.textContent = msg;
+    if (msg) statusTimer = setTimeout(idleStatus, 4000);
+  }
+  function idleStatus() { statusEl.innerHTML = 'Нажмите кнопку или <kbd>Пробел</kbd>'; }
+
+  function showCurrent(played) {
+    const s = byId(current) || SOUNDS[0];
+    currentEl.textContent = s.random && played ? '🎲 ' + played.e + ' ' + played.n : s.e + ' ' + s.n;
+  }
+
+  function chip(s) {
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.setAttribute('aria-pressed', String(s.id === current));
+    const l = document.createElement('span');
+    l.className = 'lbl';
+    l.textContent = s.e + ' ' + s.n;
+    b.append(l);
+    if (s.data) {
+      const x = document.createElement('span');
+      x.className = 'x'; x.textContent = '✕'; x.title = 'Удалить';
+      x.addEventListener('click', e => {
+        e.stopPropagation();
+        if (!confirm('Удалить «' + s.n + '»?')) return;
+        customs = customs.filter(c => c !== s);
+        dbDel(s.id);
+        if (current === s.id) select('beep', false);
+        renderChips();
+      });
+      b.append(x);
+    }
+    b.addEventListener('click', () => select(s.id, true));
+    return b;
+  }
+
+  function renderChips() {
+    groupsEl.innerHTML = '';
+    const groups = ['Классика', 'Мемы', 'Фразы', 'Свои'];
+    for (const g of groups) {
+      let list = SOUNDS.filter(s => s.g === g);
+      if (g === 'Фразы' && !canSpeak) continue;
+      if (g === 'Свои') list = customs;
+      const h = document.createElement('h3');
+      h.textContent = g === 'Фразы' ? 'Мемные фразы (голос телефона)' : g === 'Свои' ? 'Свои звуки' : g;
+      const wrap = document.createElement('div');
+      wrap.className = 'chips';
+      // keep "Случайный" first in Классика
+      if (g === 'Классика') list = list.sort((a, b) => (b.random ? 1 : 0) - (a.random ? 1 : 0));
+      list.forEach(s => wrap.append(chip(s)));
+      if (g === 'Свои') {
+        const add = document.createElement('button');
+        add.className = 'chip add';
+        add.textContent = '＋ Загрузить файл';
+        add.addEventListener('click', () => fileIn.click());
+        wrap.append(add);
+      }
+      groupsEl.append(h, wrap);
+      if (g === 'Свои') {
+        const p = document.createElement('p');
+        p.className = 'hint';
+        p.textContent = 'MP3, WAV или M4A с телефона, до 5 МБ. Файлы хранятся только в этом браузере.';
+        groupsEl.append(p);
+      }
+    }
+  }
+
+  function select(id, preview) {
+    current = id;
+    store.set('sound', id);
+    renderChips();
+    const played = preview ? playSound(byId(id)) : null;
+    showCurrent(played);
+  }
+
+  function press() {
+    const played = playSound(byId(current) || SOUNDS[0]);
+    showCurrent(played);
+    if (navigator.vibrate) navigator.vibrate(100);
+    beepBtn.classList.add('down');
+    setTimeout(() => beepBtn.classList.remove('down'), 140);
+    setTimeout(() => {
+      if (ctx && ctx.state !== 'running' && !(played && played.say)) {
+        status('Звук заблокирован браузером. Нажмите ещё раз' + (isIOS ? ' и проверьте беззвучный режим.' : '.'));
+      }
+    }, 400);
+  }
+
+  // Web Audio sounds fire on pointerdown for speed; speech needs a full tap (click) on iOS.
+  let downFired = false;
+  beepBtn.addEventListener('pointerdown', e => {
+    const s = byId(current);
+    if (s && !s.say && !s.random) { downFired = true; press(); }
+  });
+  beepBtn.addEventListener('click', e => {
+    if (downFired) { downFired = false; return; }
+    press();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.repeat || e.target.tagName === 'INPUT') return;
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); press(); }
+  });
+
+  volIn.value = vol;
+  volIn.addEventListener('input', () => { vol = +volIn.value; store.set('vol', vol); if (master) master.gain.value = vol; });
+
+  fileIn.addEventListener('change', async () => {
+    for (const f of fileIn.files) {
+      if (f.size > 5 * 1024 * 1024) { status('«' + f.name + '» больше 5 МБ'); continue; }
+      const data = await f.arrayBuffer();
+      const rec = { id: 'c' + Date.now() + Math.random().toString(36).slice(2, 6), n: f.name.replace(/\.[^.]+$/, '').slice(0, 30), e: '🎵', g: 'Свои', data };
+      try { rec.buf = await decode(data); } catch { status('Не получилось прочитать «' + f.name + '»'); continue; }
+      customs.push(rec);
+      dbPut({ id: rec.id, n: rec.n, e: rec.e, g: rec.g, data });
+      current = rec.id;
+    }
+    fileIn.value = '';
+    select(current, true);
+  });
+
+  // ---------- iOS audio unlock ----------
   let silentEl = null;
   function silentWav() {
     const n = 4000, buf = new ArrayBuffer(44 + n), v = new DataView(buf);
@@ -213,8 +516,6 @@
       if (silentEl.paused) silentEl.play().catch(() => {});
     } catch {}
   }
-
-  // Unlock audio on every kind of gesture: iOS honours touchend/click, not always pointerdown.
   function unlock() {
     const a = audio();
     try {
@@ -227,148 +528,8 @@
   }
   ['pointerdown', 'touchstart', 'touchend', 'click', 'keydown'].forEach(ev =>
     document.addEventListener(ev, unlock, { capture: true, passive: true }));
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') { if (ctx) ctx.resume().catch(() => {}); }
-    else if (silentEl) silentEl.pause();
-  });
 
-  function checkSound() {
-    setTimeout(() => {
-      if (ctx && ctx.state !== 'running') {
-        statusEl.textContent = 'Звук заблокирован браузером. Нажмите кнопку ещё раз' +
-          (isIOS ? ' и проверьте переключатель беззвучного режима.' : '.');
-      }
-    }, 400);
-  }
-  function tone(type, freq, start, dur, peak, decay) {
-    const a = audio();
-    const o = a.createOscillator();
-    const g = a.createGain();
-    o.type = type;
-    o.frequency.setValueAtTime(freq, start);
-    g.gain.setValueAtTime(0.0001, start);
-    g.gain.exponentialRampToValueAtTime(Math.max(peak, 0.0002), start + 0.01);
-    if (decay) {
-      g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
-    } else {
-      g.gain.setValueAtTime(Math.max(peak, 0.0002), start + dur - 0.03);
-      g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
-    }
-    o.connect(g).connect(a.destination);
-    o.start(start);
-    o.stop(start + dur + 0.05);
-  }
-  function play(i = 0) {
-    const a = audio();
-    const t = a.currentTime + 0.005;
-    const v = state.vol;
-    const p = PITCH[i] || 1;
-    if (v <= 0) return;
-    if (state.sound === 'beep') {
-      tone('square', 880 * p, t, 0.42, 0.35 * v);
-    } else if (state.sound === 'buzzer') {
-      tone('sawtooth', 130 * p, t, 0.7, 0.4 * v);
-      tone('sawtooth', 137 * p, t, 0.7, 0.4 * v);
-    } else {
-      tone('sine', 1320 * p, t, 1.4, 0.6 * v, true);
-      tone('sine', 2640 * p, t, 0.6, 0.18 * v, true);
-      tone('sine', 1320 * p, t + 0.18, 1.2, 0.45 * v, true);
-    }
-  }
-
-  // ---------- UI ----------
-  const board = document.getElementById('board');
-  const statusEl = document.getElementById('status');
-  const resetBtn = document.getElementById('reset');
-
-  function render() {
-    board.className = 'n' + state.n;
-    board.innerHTML = '';
-    for (let i = 0; i < state.n; i++) {
-      const b = document.createElement('button');
-      b.className = 'buzz';
-      b.style.setProperty('--c', COLORS[i]);
-      b.dataset.i = i;
-      if (state.n === 1) {
-        b.innerHTML = 'BEEP';
-      } else {
-        const name = document.createElement('span');
-        name.className = 'name';
-        name.textContent = state.names[i] || ('Игрок ' + (i + 1));
-        const hint = document.createElement('small');
-        hint.textContent = 'клавиша ' + KEYS[i][0];
-        b.append(name, hint);
-      }
-      b.addEventListener('pointerdown', e => { e.preventDefault(); press(i); });
-      b.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); press(i); } });
-      board.append(b);
-    }
-    document.querySelectorAll('header .seg button').forEach(btn =>
-      btn.setAttribute('aria-pressed', String(+btn.dataset.n === state.n)));
-    reset(true);
-  }
-
-  function setStatus() {
-    if (state.n === 1) {
-      statusEl.innerHTML = 'Нажмите кнопку или <kbd>Пробел</kbd>';
-    } else if (state.winner === null) {
-      statusEl.innerHTML = 'Кто первый? Клавиши ' + KEYS.slice(0, state.n).map(k => '<kbd>' + k[0] + '</kbd>').join(' ');
-    }
-  }
-
-  function flash(el) {
-    el.classList.add('down');
-    setTimeout(() => el.classList.remove('down'), 140);
-  }
-
-  function press(i) {
-    const btns = board.children;
-    if (i >= btns.length) return;
-    if (state.n > 1 && state.lockout && state.winner !== null) return;
-
-    play(i);
-    checkSound();
-    if (navigator.vibrate) navigator.vibrate(state.n === 1 ? 120 : [80, 40, 80]);
-    flash(btns[i]);
-
-    if (state.n === 1) return;
-
-    if (state.lockout) {
-      state.winner = i;
-      for (const b of btns) b.classList.toggle('locked', +b.dataset.i !== i);
-      btns[i].classList.add('winner');
-      const ms = Math.round(performance.now() - state.t0);
-      statusEl.textContent = (state.names[i] || 'Игрок ' + (i + 1)) + ' первый · ' + (ms / 1000).toFixed(2) + ' с после сброса';
-      resetBtn.hidden = false;
-    }
-  }
-
-  function reset(silent) {
-    state.winner = null;
-    state.t0 = performance.now();
-    for (const b of board.children) b.classList.remove('locked', 'winner');
-    resetBtn.hidden = true;
-    setStatus();
-  }
-
-  resetBtn.addEventListener('click', () => reset());
-
-  document.querySelectorAll('header .seg button').forEach(btn =>
-    btn.addEventListener('click', () => { btn.blur(); state.n = +btn.dataset.n; store.set('n', state.n); render(); }));
-
-  // Keyboard
-  document.addEventListener('keydown', e => {
-    if (e.repeat || dlg.open) return;
-    const k = e.key.toLowerCase();
-    if (state.n === 1 && (k === ' ' || k === 'enter' || k === '1')) { e.preventDefault(); press(0); return; }
-    if (state.n > 1) {
-      const idx = KEYS.findIndex(pair => pair.includes(k));
-      if (idx > -1 && idx < state.n) { e.preventDefault(); press(idx); return; }
-      if (k === 'r' || k === ' ' || k === 'escape') { e.preventDefault(); reset(); }
-    }
-  });
-
-  // Fullscreen
+  // ---------- Fullscreen & wake lock ----------
   const fsBtn = document.getElementById('fs');
   const root = document.documentElement;
   if (!(root.requestFullscreen || root.webkitRequestFullscreen)) fsBtn.hidden = true;
@@ -379,50 +540,25 @@
       (root.requestFullscreen || root.webkitRequestFullscreen).call(root);
     }
   });
-
-  // Keep screen awake while the page is visible
-  let wakeLock = null;
   async function keepAwake() {
-    try { if ('wakeLock' in navigator && document.visibilityState === 'visible') wakeLock = await navigator.wakeLock.request('screen'); } catch {}
+    try { if ('wakeLock' in navigator && document.visibilityState === 'visible') await navigator.wakeLock.request('screen'); } catch {}
   }
-  document.addEventListener('visibilitychange', keepAwake);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') { keepAwake(); if (ctx) ctx.resume().catch(() => {}); }
+    else if (silentEl) silentEl.pause();
+  });
   document.addEventListener('pointerdown', function once() { keepAwake(); document.removeEventListener('pointerdown', once); });
 
-  // ---------- Settings ----------
-  const dlg = document.getElementById('settings');
-  const vol = document.getElementById('vol');
-  const lockout = document.getElementById('lockout');
-  const namesBox = document.getElementById('names');
-
-  document.getElementById('settingsBtn').addEventListener('click', () => {
-    vol.value = state.vol;
-    lockout.checked = state.lockout;
-    document.querySelectorAll('#soundSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.s === state.sound)));
-    namesBox.innerHTML = '';
-    for (let i = 0; i < 4; i++) {
-      const inp = document.createElement('input');
-      inp.value = state.names[i] || '';
-      inp.placeholder = 'Игрок ' + (i + 1);
-      inp.maxLength = 24;
-      inp.style.borderLeft = '6px solid ' + COLORS[i];
-      inp.addEventListener('input', () => { state.names[i] = inp.value.trim() || ('Игрок ' + (i + 1)); store.set('names', state.names); });
-      namesBox.append(inp);
-    }
-    dlg.showModal();
+  // ---------- Init ----------
+  idleStatus();
+  renderChips();
+  showCurrent();
+  dbAll().then(list => {
+    if (!list.length) return;
+    customs = list.map(r => ({ ...r, g: 'Свои' }));
+    renderChips();
+    showCurrent();
   });
-  document.getElementById('closeSettings').addEventListener('click', () => dlg.close());
-  dlg.addEventListener('close', render);
-
-  document.querySelectorAll('#soundSeg button').forEach(b => b.addEventListener('click', () => {
-    state.sound = b.dataset.s; store.set('sound', state.sound);
-    document.querySelectorAll('#soundSeg button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-    play(0);
-  }));
-  vol.addEventListener('input', () => { state.vol = +vol.value; store.set('vol', state.vol); });
-  vol.addEventListener('change', () => play(0));
-  lockout.addEventListener('change', () => { state.lockout = lockout.checked; store.set('lockout', state.lockout); });
-
-  render();
 })();
 </script>
 </body>
